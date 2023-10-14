@@ -6,8 +6,11 @@ namespace OpenTKTutorial
     {
         static void Main(string[] args)
         {
-          Console.WriteLine("Beans");
-          using (Game game = new Game(800, 600, "LearnOpenTK"))
+
+          Console.WriteLine("Welcome to the future of video game development");
+          Console.WriteLine("This is: Amateur Hour");
+
+          using (Game game = new Game(800, 600, "Amateur Hour"))
           {
               game.Run();
           }
