@@ -11,7 +11,8 @@ namespace GameSpace
       GameWindowSettings.Default,
       new NativeWindowSettings() { Size = (width, height), Title = title}
     ) {
-
+      // Hey let's try loading our shader
+      Shader newShader = new Shader("./shader.vert", "./shader.frag");
     }
 
     // Array literal containing x, y, and z points as floats.
