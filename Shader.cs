@@ -34,5 +34,17 @@ public class Shader {
     // if you want to change the source for a given shader.)
     GL.ShaderSource(VertexShaderHandle, VertexShaderSource);
     GL.ShaderSource(FragmentShaderHandle, FragmentShaderSource);
+
+    // Ok now let's try compiling them.
+    GL.CompileShader(VertexShaderHandle);
+    GL.CompileShader(FragmentShaderHandle);
+
+    // ...and check for errors.
+    GL.GetShader(VertexShaderHandle, ShaderParameter.CompileStatus, out int success);
+    if (success == 0)
+    {
+      string infoLog = GL.GetShaderInfoLog(VertexShaderHandle);
+      Console.WriteLine(infoLog);
+    }
   }
 }
