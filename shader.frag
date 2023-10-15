@@ -3,7 +3,7 @@
 
 //(.frag for fragment shader!)
 
-#version 420 core
+#version 410 core
 
 //Declare output variable
 //It's vec4 because it'll hold 4 floats: the RGBA values.
