@@ -61,6 +61,44 @@ namespace GameSpace
         testVertices.Length * sizeof(float),
         testVertices,
         BufferUsageHint.StaticDraw);
+
+      // Here we're creating a Vertex Array Object (VAO) and bind it.
+      // This is a becoming a common pattern!
+      int VertexArrayObject = GL.GenVertexArray();
+      GL.BindVertexArray(VertexArrayObject);
+
+      // Alright, this is a big function call, so time for some long-form notes.
+      // This function tells OpenGL *how* to interpret the vertex data, on a per-vertex-attribute basis.
+      GL.VertexAttribPointer(
+        // index (int):
+        // Which attribute are we configuring? In this case, we're configuring the position.
+        // We specified this in the shader! This line:
+        ////   layout (location = 0) in vec3 aPosition;
+        // So this attribute is at at location 0.
+        0,
+        // size (int):
+        // since it's a vec3, then the size is 3 (x, y, and z floats));
+        3, 
+        // type (enum): 
+        // the data is float data, so we use the appropriate enum.
+        VertexAttribPointerType.Float, 
+        // normalized (bool): 
+        // this means "do you want me to normalize this?"
+        // it does NOT mean "is this data normalized already?"
+        // since our data is already normalized, we don't want GL to normalize it for us.
+        false,
+        // stride (int): how big is the space between each attribute?
+        3 * sizeof(float),
+        // offset (int):
+        // Where in the buffer does this data start?
+        // Since we're at the very beginning, it's just 0. (This will be explored more later.)
+        0
+      );
+
+      // Each vertex takes its data from memory managed by a VBOs.
+      // We can have multiple VBOs in existence!
+      // The current VBO is the VBO bound to ArrayBuffer *when we call VertexAttribPointer*.
+      // So our VertexAttribPointer will be taking the data from the VBO that we bound earlier.
     }
 
     protected override void OnUnload()
