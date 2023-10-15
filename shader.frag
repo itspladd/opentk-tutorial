@@ -3,6 +3,7 @@
 
 //(.frag for fragment shader!)
 
+// Note to self: 'glxinfo' command showed me the OpenGL version I'm running.
 #version 410 core
 
 //Declare output variable
