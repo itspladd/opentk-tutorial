@@ -9,7 +9,11 @@ namespace GameSpace
   {
     public Game(int width, int height, string title) : base(
       GameWindowSettings.Default,
-      new NativeWindowSettings() { Size = (width, height), Title = title}
+      new NativeWindowSettings() { 
+        Size = (width, height),
+        Title = title,
+        Flags = ContextFlags.Debug
+      }
     ) {
 
     }
@@ -50,6 +54,8 @@ namespace GameSpace
       VertexBufferObject = GL.GenBuffer();
 
       InitVertexArray(testVertices);
+
+      shader?.Use();
     }
     
 
@@ -86,6 +92,16 @@ namespace GameSpace
       GL.Clear(ClearBufferMask.ColorBufferBit);
 
       // Now we can actually do stuff.
+
+      // Assuming we have an initialized VertexArrayObject...
+      // ...and assuming we have a shader ready to go...
+      // then we can draw what's in our VertexArrayObject?!?!
+      
+      // This code is breaking something!
+      shader?.Use();
+      GL.BindVertexArray(VertexArrayObject);
+      GL.DrawArrays(PrimitiveType.Triangles,0,3);
+      /////
 
       // First off: switch the buffers.
       // OpenGL renders to one buffer while displaying a second buffer.

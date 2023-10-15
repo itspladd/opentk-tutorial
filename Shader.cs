@@ -40,11 +40,8 @@ public class Shader {
 
     // ...and check for errors.
     GL.GetShader(VertexShaderHandle, ShaderParameter.CompileStatus, out int getShaderSuccess);
-    if (getShaderSuccess == 0)
-    {
-      string infoLog = GL.GetShaderInfoLog(VertexShaderHandle);
-      Console.WriteLine(infoLog);
-    }
+    string vertexInfoLog = GL.GetShaderInfoLog(VertexShaderHandle);
+    Console.WriteLine(vertexInfoLog);
 
     // Now we create a program handle. From here on, a "shader" is a GPU-runnable program.
     Handle = GL.CreateProgram();
@@ -59,11 +56,8 @@ public class Shader {
 
     // ...and try to load it, and check for errors again.
     GL.GetProgram(Handle, GetProgramParameterName.LinkStatus, out int getProgramSuccess);
-    if (getProgramSuccess == 0)
-    {
-      string infoLog = GL.GetProgramInfoLog(Handle);
-      Console.WriteLine(infoLog);
-    }
+    string fragmentInfoLog = GL.GetProgramInfoLog(Handle);
+    Console.WriteLine(fragmentInfoLog);
 
     // Now we can clean up. The shader source code isn't needed anymore since it's linked
     GL.DetachShader(Handle, VertexShaderHandle);
