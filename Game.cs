@@ -11,8 +11,7 @@ namespace GameSpace
       GameWindowSettings.Default,
       new NativeWindowSettings() { Size = (width, height), Title = title}
     ) {
-      // Hey let's try loading our shader
-      Shader newShader = new Shader("./shader.vert", "./shader.frag");
+
     }
 
     // Array literal containing x, y, and z points as floats.
@@ -29,10 +28,17 @@ namespace GameSpace
 
     // Int to store the ID of a vertex buffer object (VBO)
     int VertexBufferObject;
+
+    // Shader property
+    // ? to mark it as nullable
+    Shader? shader;
   
     // OnLoad runs once, when the window opens. Initialization code goes here.
     protected override void OnLoad() {
       base.OnLoad();
+
+      // Hey let's try loading our shader
+      shader = new Shader("shader.vert", "shader.frag");
 
       // Decides what color the window should be after it gets cleared between frames
       GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -55,6 +61,14 @@ namespace GameSpace
         testVertices.Length * sizeof(float),
         testVertices,
         BufferUsageHint.StaticDraw);
+    }
+
+    protected override void OnUnload()
+    {
+      base.OnUnload();
+
+      // Only dispose of the shader if it's not null
+      shader?.Dispose();
     }
 
     // Pretty self-explanatory: runs when the window gets resized.
