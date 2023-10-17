@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -12,11 +13,12 @@ namespace GameSpace
       new NativeWindowSettings() { 
         Size = (width, height),
         Title = title,
-        Flags = ContextFlags.Debug
+        Flags = ContextFlags.Debug,
       }
     ) {
 
     }
+    private static DebugProc DebugMessageDelegate = OnDebugMessage;
 
     // Array literal containing x, y, and z points as floats.
     // Note that it's a one-dimensional array! It's just formatted to look like a 3x3.
@@ -43,7 +45,8 @@ namespace GameSpace
     // OnLoad runs once, when the window opens. Initialization code goes here.
     protected override void OnLoad() {
       base.OnLoad();
-
+      GL.DebugMessageCallback(DebugMessageDelegate, IntPtr.Zero);
+      GL.Enable(EnableCap.DebugOutput);
       // Hey let's try loading our shader
       shader = new Shader("shader.vert", "shader.frag");
 
@@ -53,7 +56,7 @@ namespace GameSpace
       // Generate a buffer and assign its ID to the int we created.
       VertexBufferObject = GL.GenBuffer();
 
-      InitVertexArray(testVertices);
+      InitVertexArrayWithNotes(testVertices);
 
       shader?.Use();
     }
@@ -97,11 +100,9 @@ namespace GameSpace
       // ...and assuming we have a shader ready to go...
       // then we can draw what's in our VertexArrayObject?!?!
       
-      // This code is breaking something!
       shader?.Use();
       GL.BindVertexArray(VertexArrayObject);
       GL.DrawArrays(PrimitiveType.Triangles,0,3);
-      /////
 
       // First off: switch the buffers.
       // OpenGL renders to one buffer while displaying a second buffer.
@@ -145,7 +146,7 @@ namespace GameSpace
 
       // 3. Copy our vertices into our global VBO (bind it first!)
       GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferObject);
-      GL.BufferData(BufferTarget.ArrayBuffer, 3 * sizeof(float), vertices, BufferUsageHint.StaticDraw);
+      GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
 
       // 4. Set the vertex attribute pointers
       GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
@@ -215,5 +216,32 @@ namespace GameSpace
       // And we have to specify the index.
       GL.EnableVertexAttribArray(0);
     }
+
+    private static void OnDebugMessage(
+        DebugSource source,     // Source of the debugging message.
+        DebugType type,         // Type of the debugging message.
+        int id,                 // ID associated with the message.
+        DebugSeverity severity, // Severity of the message.
+        int length,             // Length of the string in pMessage.
+        IntPtr pMessage,        // Pointer to message string.
+        IntPtr pUserParam)      // The pointer you gave to OpenGL, explained later.
+    {
+      // In order to access the string pointed to by pMessage, you can use Marshal
+      // class to copy its contents to a C# string without unsafe code. You can
+      // also use the new function Marshal.PtrToStringUTF8 since .NET Core 1.1.
+      string message = Marshal.PtrToStringAnsi(pMessage, length);
+
+      // The rest of the function is up to you to implement, however a debug output
+      // is always useful.
+      Console.WriteLine("[{0} source={1} type={2} id={3}] {4}", severity, source, type, id, message);
+
+      // Potentially, you may want to throw from the function for certain severity
+      // messages.
+      if (type == DebugType.DebugTypeError)
+      {
+          throw new Exception(message);
+      }
+    }
+
   }
 }
