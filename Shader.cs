@@ -1,6 +1,7 @@
 // Alright baby let's make a shader class
 // This will be responsible for pulling in our shader source files
 // Plus other functions later (ooh mysterious)
+using LoggerUtil;
 using OpenTK.Graphics.OpenGL;
 
 public class Shader {
@@ -11,7 +12,11 @@ public class Shader {
   // Because otherwise the memory won't be freed.
   private bool disposed = false;
 
-  public Shader(string vertexSourcePath, string fragmentSourcePath) {
+  private Logger logger;
+
+  public Shader(string vertexSourcePath, string fragmentSourcePath, Logger logger) {
+    this.logger = logger;
+    logger.Debug("Initializing Shader class");
     // More handles. These will represent the location of each one after compilation(?).
     int VertexShaderHandle;
     int FragmentShaderHandle;
@@ -80,6 +85,15 @@ public class Shader {
 
   public void Use() {
     GL.UseProgram(Handle);
+  }
+
+  /**
+  * Retrieves the location of the input attribute for this Shader.
+  * This saves us from having to specify layout(location=0) in the shader code...
+  * And we can use this anywhere else that we would want to hard-code a location.
+  */
+  public int GetAttribLocation(string attribName) {
+    return GL.GetAttribLocation(Handle, attribName);
   }
 
   // Frees up the memory used by this shader, and sets the flag saying it's OK to clean up.

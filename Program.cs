@@ -5,13 +5,16 @@ namespace OpenTKTutorial
 {
     class Program
     {
+        private static LogLevel logLevel = LogLevel.WARNING;
         static void Main(string[] args)
         {
-          Logger logger = new Logger();
-          logger.Log("Welcome to the future of video game development");
-          logger.Log("This is: Amateur Hour");
+          Logger logger = new Logger(logLevel);
+          logger.Info("Welcome to the future of video game development");
+          logger.Info("This is: Amateur Hour");
 
-          using (Game game = new Game(800, 600, "Amateur Hour", logger))
+          GameOptions options = new GameOptions(logLevel);
+
+          using (Game game = new Game(800, 600, "Amateur Hour", logger, options))
           {
               game.Run();
           }
