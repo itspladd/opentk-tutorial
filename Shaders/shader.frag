@@ -4,11 +4,11 @@
 //(.frag for fragment shader!)
 
 // Note to self: 'glxinfo' command showed me the OpenGL version I'm running.
-#version 420 core
+#version 300 es
 
 //Declare output variable
 //It's vec4 because it'll hold 4 floats: the RGBA values.
-out vec4 FragColor;
+out mediump vec4 FragColor;
 
 void main()
 {

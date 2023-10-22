@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
-using OpenTK.Graphics.OpenGL4;
+using LoggerUtil;
+using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
@@ -8,7 +9,7 @@ namespace GameSpace
 {
   public class Game : GameWindow
   {
-    public Game(int width, int height, string title) : base(
+    public Game(int width, int height, string title, Logger inputLogger) : base(
       GameWindowSettings.Default,
       new NativeWindowSettings() { 
         Size = (width, height),
@@ -16,8 +17,13 @@ namespace GameSpace
         Flags = ContextFlags.Debug,
       }
     ) {
-
+      logger = inputLogger;
+      logger.DeltaLog("Initializing Game class");
     }
+    private Logger logger;
+
+    private int FrameCount = 0;
+    private const int FRAMES_TO_LOG = 5;
     private static DebugProc DebugMessageDelegate = OnDebugMessage;
 
     // Array literal containing x, y, and z points as floats.
@@ -40,25 +46,33 @@ namespace GameSpace
 
     // Shader property
     // ? to mark it as nullable
-    Shader? shader;
+    Shader shader;
   
     // OnLoad runs once, when the window opens. Initialization code goes here.
     protected override void OnLoad() {
+      logger.DeltaLog("OnLoad starting");
       base.OnLoad();
+      logger.DeltaLog("base.OnLoad complete");
       GL.DebugMessageCallback(DebugMessageDelegate, IntPtr.Zero);
+      logger.DeltaLog("Debug callback registered");
       GL.Enable(EnableCap.DebugOutput);
+      logger.DeltaLog("Debug enable completed");
       // Hey let's try loading our shader
-      shader = new Shader("shader.vert", "shader.frag");
-
+      shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
+      logger.DeltaLog("Shaders loaded");
       // Decides what color the window should be after it gets cleared between frames
       GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+      logger.DeltaLog("ClearColor set");
 
       // Generate a buffer and assign its ID to the int we created.
       VertexBufferObject = GL.GenBuffer();
+      logger.DeltaLog("VBO generated");
 
-      InitVertexArrayWithNotes(testVertices);
+      InitVertexArray(testVertices);
+      logger.DeltaLog("Vertex Array Initiated");
 
-      shader?.Use();
+      shader.Use();
+      logger.DeltaLog("shader.Use() complete");
     }
     
 
@@ -67,7 +81,7 @@ namespace GameSpace
       base.OnUnload();
 
       // Only dispose of the shader if it's not null
-      shader?.Dispose();
+      shader.Dispose();
     }
 
     // Pretty self-explanatory: runs when the window gets resized.
@@ -88,27 +102,52 @@ namespace GameSpace
 
     protected override void OnRenderFrame(FrameEventArgs e)
     {
+      if(FrameCount <= FRAMES_TO_LOG) {
+        logger.DeltaLog("Starting render frame (frame " + FrameCount + ")");
+        logger.DeltaLog("GL enum values:");
+        logger.DeltaLog("Renderer: " + GL.GetString(StringName.Renderer));
+        logger.DeltaLog("Version: " + GL.GetString(StringName.Version));
+        logger.DeltaLog("ShadingLanguageVersion: " + GL.GetString(StringName.ShadingLanguageVersion));
+      }
       base.OnRenderFrame(e);
-
+      if(FrameCount <= FRAMES_TO_LOG) {
+        logger.DeltaLog("Base OnRenderFrame complete");
+      }
       // Call this first (well, after the base call) when rendering.
       // Apparently ClearBufferMask.ColorBufferBit has teh color we specified in GL.ClearColor?
       GL.Clear(ClearBufferMask.ColorBufferBit);
-
+      if(FrameCount <= FRAMES_TO_LOG) {
+        logger.DeltaLog("Clear complete");
+      }
       // Now we can actually do stuff.
 
       // Assuming we have an initialized VertexArrayObject...
       // ...and assuming we have a shader ready to go...
       // then we can draw what's in our VertexArrayObject?!?!
-      
-      shader?.Use();
-      GL.BindVertexArray(VertexArrayObject);
-      GL.DrawArrays(PrimitiveType.Triangles,0,3);
+      shader.Use();
+      if(FrameCount <= FRAMES_TO_LOG) {
+        logger.DeltaLog("shader.Use() complete");
+      }
 
+      GL.BindVertexArray(VertexArrayObject);
+      if(FrameCount <= FRAMES_TO_LOG) {
+        logger.DeltaLog("VAO bound");
+      }
+
+      GL.DrawArrays(PrimitiveType.Triangles,0,3);
+        
+      if(FrameCount <= FRAMES_TO_LOG) {
+        logger.DeltaLog("DrawArrays complete");
+      }
       // First off: switch the buffers.
       // OpenGL renders to one buffer while displaying a second buffer.
       // So we swap them: we are now displaying whatever was previously rendered,
       // and (I presume) rendering over what was previously displayed
       SwapBuffers();
+      if(FrameCount <= FRAMES_TO_LOG) {
+        logger.DeltaLog("Buffers swapped");
+      }
+      FrameCount++;
     }
 
     protected void KillBuffer(BufferTarget target, int bufferObjectRef) {

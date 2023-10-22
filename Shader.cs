@@ -1,11 +1,11 @@
 // Alright baby let's make a shader class
 // This will be responsible for pulling in our shader source files
 // Plus other functions later (ooh mysterious)
-using OpenTK.Graphics.OpenGL4;
+using OpenTK.Graphics.OpenGL;
 
 public class Shader {
   // This Handle var will represent the location of the shader program after it's compiled.
-  int Handle;
+  private int Handle;
 
   // This bool represents whether or not the shader has been properly deleted before the program ends.
   // Because otherwise the memory won't be freed.
@@ -23,6 +23,8 @@ public class Shader {
     // 2. I cannot be stopped.
     string VertexShaderSource = File.ReadAllText(vertexSourcePath);
     string FragmentShaderSource = File.ReadAllText(fragmentSourcePath);
+    //Console.WriteLine(VertexShaderSource);
+    //Console.WriteLine(FragmentShaderSource);
 
     // Now we generate the shader objects in GL and save their handles to our ints...
     VertexShaderHandle = GL.CreateShader(ShaderType.VertexShader);
@@ -39,9 +41,17 @@ public class Shader {
     GL.CompileShader(FragmentShaderHandle);
 
     // ...and check for errors.
-    GL.GetShader(VertexShaderHandle, ShaderParameter.CompileStatus, out int getShaderSuccess);
+    GL.GetShader(VertexShaderHandle, ShaderParameter.CompileStatus, out int getVertexShaderSuccess);
     string vertexInfoLog = GL.GetShaderInfoLog(VertexShaderHandle);
-    Console.WriteLine(vertexInfoLog);
+    if (getVertexShaderSuccess == 0) {
+      Console.WriteLine(vertexInfoLog);
+    }
+
+    GL.GetShader(FragmentShaderHandle, ShaderParameter.CompileStatus, out int getFragmentShaderSuccess);
+    string fragmentInfoLog = GL.GetShaderInfoLog(FragmentShaderHandle);
+    if (getFragmentShaderSuccess == 0) {
+      Console.WriteLine(fragmentInfoLog);
+    }
 
     // Now we create a program handle. From here on, a "shader" is a GPU-runnable program.
     Handle = GL.CreateProgram();
@@ -56,8 +66,10 @@ public class Shader {
 
     // ...and try to load it, and check for errors again.
     GL.GetProgram(Handle, GetProgramParameterName.LinkStatus, out int getProgramSuccess);
-    string fragmentInfoLog = GL.GetProgramInfoLog(Handle);
-    Console.WriteLine(fragmentInfoLog);
+    string programInfoLog = GL.GetProgramInfoLog(Handle);
+    if (getProgramSuccess == 0) {
+      Console.WriteLine(programInfoLog);
+    }
 
     // Now we can clean up. The shader source code isn't needed anymore since it's linked
     GL.DetachShader(Handle, VertexShaderHandle);

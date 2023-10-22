@@ -9,6 +9,21 @@
       ],
       "group": "build",
       "label": "dotnet: build"
+    },
+    {
+      "label": "dotnet: release",
+      "task":"build release",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/opentk_tutorial.csproj",
+        "-c",
+        "Release"
+      ],
+      "problemMatcher": [
+        "$msCompile"
+      ]
     }
   ]
 }

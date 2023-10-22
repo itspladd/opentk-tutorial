@@ -9,4 +9,15 @@
   <ItemGroup>
     <PackageReference Include="OpenTK" Version="4.8.1"/>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders/**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+  <None Update="Shaders\shader.frag">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+  <None Update="Shaders\shader.vert">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+</ItemGroup>
 </Project>

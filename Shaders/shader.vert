@@ -5,7 +5,7 @@
 //(.vert file extension, for vertex shader!)
 
 //Declare version and "core profile" (??)
-#version 420 core
+#version 300 es
 
 //ha ha what
 //okay so this is a vector with length three to hold the vertices
