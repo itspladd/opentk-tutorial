@@ -204,8 +204,9 @@ namespace GameSpace
       GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
 
       // 4. Set the vertex attribute pointers
-      GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
-      GL.EnableVertexAttribArray(0);
+      int aPosition = shader.GetAttribLocation("aPosition");
+      GL.VertexAttribPointer(aPosition, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+      GL.EnableVertexAttribArray(aPosition);
 
     }
 
@@ -233,7 +234,7 @@ namespace GameSpace
         vertices,
         BufferUsageHint.StaticDraw);
 
-
+      int aPosition = shader.GetAttribLocation("aPosition");
       // Alright, this is a big function call, so time for some long-form notes.
       // This function tells OpenGL *how* to interpret the vertex data, on a per-vertex-attribute basis.
       GL.VertexAttribPointer(
@@ -242,7 +243,9 @@ namespace GameSpace
         // We specified this in the shader! This line:
         ////   layout (location = 0) in vec3 aPosition;
         // So this attribute is at at location 0.
-        0,
+        // with our new shader GetAttribLocation function, we use that instead of hard-coding a 0 here.
+        // 0,
+        aPosition,
         // size (int):
         // since it's a vec3, then the size is 3 (x, y, and z floats));
         3, 
@@ -269,7 +272,7 @@ namespace GameSpace
 
       // Now we have to enable vertex attributes (which are...disabled by default? huh?)
       // And we have to specify the index.
-      GL.EnableVertexAttribArray(0);
+      GL.EnableVertexAttribArray(aPosition);
     }
 
     private static void OnDebugMessage(
