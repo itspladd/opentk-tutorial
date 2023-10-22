@@ -9,8 +9,7 @@
 
 //ha ha what
 //okay so this is a vector with length three to hold the vertices
-//and also a...layout? 
-layout (location = 0) in vec3 aPosition;
+in vec3 aPosition;
 
 //Every shader has a main function
 void main()

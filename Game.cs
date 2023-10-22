@@ -61,9 +61,8 @@ namespace GameSpace
     // OnLoad runs once, when the window opens. Initialization code goes here.
     protected override void OnLoad() {
       base.OnLoad();
-      
+      LogGLInformation();
       GL.DebugMessageCallback(DebugMessageDelegate, IntPtr.Zero);
-      
       GL.Enable(EnableCap.DebugOutput);
       
       // Hey let's try loading our shader
@@ -169,12 +168,6 @@ namespace GameSpace
     protected void RenderWithDebugLogs(FrameEventArgs e) {
       logger.Debug(string.Format("-----  START FRAME {0}  -----", FrameCount));
       base.OnRenderFrame(e);
-
-      // Log some enums for troubleshooting
-      logger.Debug("GL enum values:");
-      logger.Debug("Renderer: " + GL.GetString(StringName.Renderer));
-      logger.Debug("Version: " + GL.GetString(StringName.Version));
-      logger.Debug("ShadingLanguageVersion: " + GL.GetString(StringName.ShadingLanguageVersion));
       
       base.OnRenderFrame(e);
       logger.Debug("base.OnRenderFrame complete");
@@ -313,6 +306,17 @@ namespace GameSpace
       // Now we have to enable vertex attributes (which are...disabled by default? huh?)
       // And we have to specify the index.
       GL.EnableVertexAttribArray(aPosition);
+    }
+
+    protected void LogGLInformation() {
+      // Log some GL values for troubleshooting
+      GL.GetInteger(GetPName.MaxVertexAttribs, out int numMaxVertexAttribs);
+      string glInfoString = "Logging GL info:" +
+        "\n** Renderer: " + GL.GetString(StringName.Renderer) +
+        "\n** Version: " + GL.GetString(StringName.Version) +
+        "\n** ShadingLanguageVersion: " + GL.GetString(StringName.ShadingLanguageVersion) +
+        "\n** Maximum num of vertex attributes supported: " + numMaxVertexAttribs;
+      logger.Debug(glInfoString);
     }
 
     protected void KillBuffer(BufferTarget target, int bufferObjectRef) {

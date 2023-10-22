@@ -5,7 +5,7 @@ namespace OpenTKTutorial
 {
     class Program
     {
-        private static LogLevel logLevel = LogLevel.WARNING;
+        private static LogLevel logLevel = LogLevel.INFO;
         static void Main(string[] args)
         {
           Logger logger = new Logger(logLevel);
