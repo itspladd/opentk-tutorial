@@ -17,6 +17,11 @@ namespace GameSpace
 
   public class Game : GameWindow
   {
+    public enum Geometry {
+      TRIANGLE,
+      RECTANGLE
+    }
+
     public Game(int width, int height, string title, Logger logger, GameOptions options) : base(
       GameWindowSettings.Default,
       new NativeWindowSettings() { 
@@ -37,20 +42,12 @@ namespace GameSpace
     private const int END_LOG_FRAME = 10;
     private static DebugProc DebugMessageDelegate = OnDebugMessage;
 
-    // Array literal containing x, y, and z points as floats.
-    // Note that it's a one-dimensional array! It's just formatted to look like a 3x3.
-    // These coordinates are normalized: they must fall within the -1.0f to 1.0f range.
-    // Anything outside that range will be clipped!
-    // Normalized coordinates get converted to screen-space coordinates
-    // using the Viewport information.
-    float[] testVertices = {
-      -0.5f, -0.5f, 0.0f,
-       0.5f, -0.5f, 0.0f,
-       0.0f,  0.5f, 0.0f 
-    };
+    float[] vertices;
+    uint[] indices;
 
-    // Int to store the ID of a vertex buffer object (VBO)
+    // Ints to store the IDs of vertex and element buffer objects (VBOs and EBOs)
     int VertexBufferObject;
+    int ElementBufferObject;
 
     // Int to store the ID of a vertex array object (VAO)
     int VertexArrayObject;
@@ -58,6 +55,8 @@ namespace GameSpace
     // Shader property
     // ? to mark it as nullable
     Shader shader;
+
+    private Geometry currentGeom;
   
     // OnLoad runs once, when the window opens. Initialization code goes here.
     protected override void OnLoad() {
@@ -72,15 +71,52 @@ namespace GameSpace
       
       // Decides what color the window should be after it gets cleared between frames
       GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+      currentGeom = Geometry.TRIANGLE;
+      SetGeometryData(currentGeom);
 
-      // Generate a buffer and assign its ID to the int we created.
-      VertexBufferObject = GL.GenBuffer();
-
-      InitVertexArray(testVertices);
+      InitVertexBuffer(vertices);
+      if (currentGeom == Geometry.RECTANGLE) {
+        InitElementBuffer(indices);
+      }
 
       shader.Use();
     }
-    
+
+    // ..:: Initialization code for a single vertex array. ::..
+    // (We only do this once, unless the object will change often.)
+    protected void InitVertexBuffer(float[] vertices) {
+      // 1. Generate the VBO and VAO and assign their IDs to the global ints we created.
+      VertexBufferObject = GL.GenBuffer();
+      VertexArrayObject = GL.GenVertexArray();
+
+      // 2. Bind it
+      GL.BindVertexArray(VertexArrayObject);
+
+      // 3. Copy our vertices into our global VBO (bind it first!)
+      GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferObject);
+      GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
+
+      // 4. Set the vertex attribute pointers
+      int aPosition = shader.GetAttribLocation("aPosition");
+      GL.VertexAttribPointer(aPosition, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+      GL.EnableVertexAttribArray(aPosition);
+    }
+
+    // ..:: Initialization for a single element buffer. ::..
+    // Note that we can only bind an ElementArrayBuffer if there is a VAO bound already!
+    // It seems like the ElementArrayBuffer is "owned" by the VAO that's bound when we bind the EBO.
+    protected void InitElementBuffer(uint[] indices) {
+      // Similar code/process as the vertex buffer init!
+      ElementBufferObject = GL.GenBuffer();
+      GL.BindBuffer(BufferTarget.ElementArrayBuffer, ElementBufferObject);
+      GL.BufferData(
+        BufferTarget.ElementArrayBuffer,
+        indices.Length * sizeof(uint),
+        indices,
+        BufferUsageHint.StaticDraw
+      );
+
+    }
 
     protected override void OnUnload()
     {
@@ -117,7 +153,10 @@ namespace GameSpace
       shader.Use();
 
       GL.BindVertexArray(VertexArrayObject);
-      GL.DrawArrays(PrimitiveType.Triangles,0,3);
+      
+      if (currentGeom == Geometry.TRIANGLE) {
+        GL.DrawArrays(PrimitiveType.Triangles,0,3);
+      }
 
       SwapBuffers();
       FrameCount++;
@@ -166,47 +205,41 @@ namespace GameSpace
       FrameCount++;
     }
 
-    protected void KillBuffer(BufferTarget target, int bufferObjectRef) {
-      // We don't need to manually delete buffers to free memory when the program ends.
-      // The program will clean up after itself without us worrying about manual deletion.
-      // But, if we ever WANT to manually delete a buffer...
-      // (for...reasons? the tutorial suggests "limiting VRAM usage" as a
-      // potential reason, but I need to learn more about that)
-      // ...then this is the way (or at least *a* way) to do it.
-      
-      // First, bind the BufferTarget to 0. This way, if we try to call this buffer
-      // without re-binding it first, then we crash.  Which is apparently easier
-      // to debug than accidentally modifying a supposedly-deleted buffer.
-      // Then we actually delete the buffer object at the ref.
-      GL.BindBuffer(target, 0);
-      GL.DeleteBuffer(bufferObjectRef);
+    private void SetGeometryData(Geometry geomType) {
+      // Array literals containing x, y, and z points as floats.
+      // Note that they are a one-dimensional arrays! They're just formatted to look like 3xN arrays.
+      // These coordinates are normalized: they must fall within the -1.0f to 1.0f range.
+      // Anything outside that range will be clipped!
+      // Normalized coordinates get converted to screen-space coordinates
+      // using the Viewport information.
+      float[] triangleVertices = {
+        -0.5f, -0.5f, 0.0f,
+        0.5f, -0.5f, 0.0f,
+        0.0f,  0.5f, 0.0f 
+      };
 
-      // For reference, here's the version of this code if we used the specific
-      // buffers/variables from the tutorial:
-      // GL.BindBuffer(BufferTarget.ArrayBuffer, 0)
-      // GL.DeleteBuffer(VertexBufferObject)
+      float[] rectangleVertices = {
+        -0.5f, -0.5f, 0.0f,
+        0.5f, -0.5f, 0.0f,
+        0.0f,  0.5f, 0.0f,
+        -0.5f, 0.5f, 0.0f 
+      };
 
-      // Note that we're not changing the value of VertexBufferObject (or bufferObjectRef)!
-      // It will still have its buffer ID; but GL won't have a bufffer with that ID.
-    }
-    
-    // ..:: Initialization code for a single vertex array. ::..
-    // (We only do this once, unless the object will change often.)
-    protected void InitVertexArray(float[] vertices) {
-      // 1. Generate the array and set it to the global param
-      VertexArrayObject = GL.GenVertexArray();
+      // For an EBO, we need to specify which triangles map to which vertices!
+      // This will draw our rectangle.
+      uint[] rectangleIndices = {
+        0, 1, 3,
+        1, 2, 3
+      };
 
-      // 2. Bind it
-      GL.BindVertexArray(VertexArrayObject);
+      if (geomType == Geometry.TRIANGLE) {
+        vertices = triangleVertices;
+      }
 
-      // 3. Copy our vertices into our global VBO (bind it first!)
-      GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferObject);
-      GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
-
-      // 4. Set the vertex attribute pointers
-      int aPosition = shader.GetAttribLocation("aPosition");
-      GL.VertexAttribPointer(aPosition, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
-      GL.EnableVertexAttribArray(aPosition);
+      if (geomType == Geometry.RECTANGLE) {
+        vertices = rectangleVertices;
+        indices = rectangleIndices;
+      }
 
     }
 
@@ -273,6 +306,30 @@ namespace GameSpace
       // Now we have to enable vertex attributes (which are...disabled by default? huh?)
       // And we have to specify the index.
       GL.EnableVertexAttribArray(aPosition);
+    }
+
+    protected void KillBuffer(BufferTarget target, int bufferObjectRef) {
+      // We don't need to manually delete buffers to free memory when the program ends.
+      // The program will clean up after itself without us worrying about manual deletion.
+      // But, if we ever WANT to manually delete a buffer...
+      // (for...reasons? the tutorial suggests "limiting VRAM usage" as a
+      // potential reason, but I need to learn more about that)
+      // ...then this is the way (or at least *a* way) to do it.
+      
+      // First, bind the BufferTarget to 0. This way, if we try to call this buffer
+      // without re-binding it first, then we crash.  Which is apparently easier
+      // to debug than accidentally modifying a supposedly-deleted buffer.
+      // Then we actually delete the buffer object at the ref.
+      GL.BindBuffer(target, 0);
+      GL.DeleteBuffer(bufferObjectRef);
+
+      // For reference, here's the version of this code if we used the specific
+      // buffers/variables from the tutorial:
+      // GL.BindBuffer(BufferTarget.ArrayBuffer, 0)
+      // GL.DeleteBuffer(VertexBufferObject)
+
+      // Note that we're not changing the value of VertexBufferObject (or bufferObjectRef)!
+      // It will still have its buffer ID; but GL won't have a bufffer with that ID.
     }
 
     private static void OnDebugMessage(
