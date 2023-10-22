@@ -71,10 +71,11 @@ namespace GameSpace
       
       // Decides what color the window should be after it gets cleared between frames
       GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-      currentGeom = Geometry.TRIANGLE;
+      currentGeom = Geometry.RECTANGLE;
       SetGeometryData(currentGeom);
 
       InitVertexBuffer(vertices);
+
       if (currentGeom == Geometry.RECTANGLE) {
         InitElementBuffer(indices);
       }
@@ -152,15 +153,18 @@ namespace GameSpace
       GL.Clear(ClearBufferMask.ColorBufferBit);
       shader.Use();
 
-      GL.BindVertexArray(VertexArrayObject);
+      //GL.BindVertexArray(VertexArrayObject);
       
       if (currentGeom == Geometry.TRIANGLE) {
         GL.DrawArrays(PrimitiveType.Triangles,0,3);
       }
+      if (currentGeom == Geometry.RECTANGLE) {
+        GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
+      }
 
       SwapBuffers();
       FrameCount++;
-      }
+    }
 
     protected void RenderWithDebugLogs(FrameEventArgs e) {
       logger.Debug(string.Format("-----  START FRAME {0}  -----", FrameCount));
@@ -188,10 +192,13 @@ namespace GameSpace
       shader.Use();
       logger.Debug("shader.Use() complete");
 
-      GL.BindVertexArray(VertexArrayObject);
-      logger.Debug("VAO bound");
-
-      GL.DrawArrays(PrimitiveType.Triangles,0,3);        
+      logger.Debug($"Drawing {currentGeom}");
+      if (currentGeom == Geometry.TRIANGLE) {
+        GL.DrawArrays(PrimitiveType.Triangles,0,3);
+      }
+      if (currentGeom == Geometry.RECTANGLE) {
+        GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
+      }      
       logger.Debug("DrawArrays complete");
 
       // Now: switch the buffers.
@@ -219,9 +226,9 @@ namespace GameSpace
       };
 
       float[] rectangleVertices = {
-        -0.5f, -0.5f, 0.0f,
+        0.5f, 0.5f, 0.0f,
         0.5f, -0.5f, 0.0f,
-        0.0f,  0.5f, 0.0f,
+        -0.5f,  -0.5f, 0.0f,
         -0.5f, 0.5f, 0.0f 
       };
 
