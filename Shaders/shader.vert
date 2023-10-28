@@ -26,6 +26,57 @@ layout (location = 0) in vec3 aPosition;
 // We're gonna be silly here and use the vertex shader to define the fragment shader's color.
 out vec4 vertexColor;
 
+vec3 absolute(vec3 inputVec) {
+  vec3 returnVec = vec3(0.0,0.0,0.0);
+  for(int i = 0; i < 3; i++) {
+    float iVal = inputVec[i];
+    iVal = iVal * sign(iVal);
+    returnVec[i] = iVal;
+  }
+  return returnVec;
+}
+
+int quadrant(vec2 position) {
+  float sX = sign(position.x);
+  float sY = sign(position.y);
+  if (sX == 1.0 && sY == 1.0) {
+    return 1;
+  }
+  if (sX == -1.0 && sY == 1.0) {
+    return 2;
+  }
+  if (sX == -1.0 && sY == -1.0) {
+    return 3;
+  }
+  if (sX == 1.0 && sY == -1.0) {
+    return 4;
+  }
+
+  return 0;
+}
+
+vec3 radialColor(vec3 inputVec) {
+  // Red in q1 (top right), yellow in ( q2top left), blue in q3 (bottom left), green in q4 (bottom right).
+  vec3 returnRGB;
+  int q = quadrant(inputVec.xy);
+  if (q == 1) {
+    returnRGB = vec3(1.0, 0.0, 0.0);
+  }
+  else if (q == 2) {
+    returnRGB = vec3(1.0, 1.0, 0.0);
+  }
+  else if (q == 3) {
+    returnRGB = vec3(0.0, 0.0, 1.0);
+  }
+  else if (q == 4) {
+    returnRGB = vec3(0.0, 1.0, 0.0);
+  }
+  else {
+    returnRGB = vec3(1.0, 1.0, 1.0);
+  }
+  return returnRGB;
+}
+
 //Every shader has a main function
 void main()
 {
@@ -40,7 +91,27 @@ void main()
   // gl_Position = vec4(aPosition.yxz, 1.0); // Swap x and y for science?
   // YUP the rectangle flipped its dimensions. Fun.
 
-  // Round 1: Send a dark red to the fragment shader.
-  vertexColor = vec4(0.5, 0.0,  0.0, 1.0);
+  // *** Round 1 ***
+  // *** Send a dark red to the fragment shader.
+  //vertexColor = vec4(0.5, 0.0,  0.0, 1.0);
 
+  // *** Round 2 ***
+  // *** What happens if we base the fragment shader's color on the vertex data?
+  //vertexColor = vec4(aPosition, 1.0);
+  // OH HECK COOL WE GOT A GRADIENT.
+  // IT's mostly black, starting from the center and also all throughout quadrant 3.
+  // So if we do an absolute value of the inputs, can we get a full radial gradient?
+  //vec3 test = absolute(aPosition);
+  //vertexColor = vec4(test, 1.0);
+  
+  // Okay that's doing something strange where the colors are (mostly) all the same.
+  // The color makes sense SOMEWHAT: if the abs of each vertex is (0.5, 0.5) then of course the colors will be the same
+  // So maybe since they're all identical, the color lerp doesn't happen?
+  // So let's try an explicit function to set the color based on the quadrant of the vertex.
+  
+  //vertexColor = vec4(radialColor(aPosition), 1.0);
+  
+  // HAHA I GOT A COOL RAINBOW GRADIENT. HELL YES.
+  // Note: I had a weird issue! I was accidentally drawing an extra triangle that had an undefined vertex!
+  // So it was using 0, 0 for that vertex and creating a weird break in the gradient.
 }

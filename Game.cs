@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 using LoggerUtil;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Common;
@@ -36,6 +37,8 @@ namespace GameSpace
     }
     private Logger logger;
 
+    private Stopwatch _timer;
+
     private GameOptions options;
     private int FrameCount = 0;
     private const int START_LOG_FRAME = 0;
@@ -64,10 +67,7 @@ namespace GameSpace
       LogGLInformation();
       GL.DebugMessageCallback(DebugMessageDelegate, IntPtr.Zero);
       GL.Enable(EnableCap.DebugOutput);
-      
-      // Hey let's try loading our shader
-      shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag", logger);
-      
+            
       // Decides what color the window should be after it gets cleared between frames
       GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
       currentGeom = Geometry.RECTANGLE;
@@ -79,7 +79,13 @@ namespace GameSpace
         InitElementBuffer(indices);
       }
 
+      // Hey let's try loading our shader
+      shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag", logger);
       shader.Use();
+
+      // Start our stopwatch
+      _timer = new Stopwatch();
+      _timer.Start();
     }
 
     // ..:: Initialization code for a single vertex array. ::..
@@ -149,7 +155,15 @@ namespace GameSpace
       }
       base.OnRenderFrame(e);
       GL.Clear(ClearBufferMask.ColorBufferBit);
+      
+      // Must call Use() on the shader before accessing uniform vars!
       shader.Use();
+
+      // Set the uniform var based on current time
+      double elapsedTime = _timer.Elapsed.TotalSeconds;
+      float greenVal = (float)Math.Sin(elapsedTime) / 2.0f + 0.5f;
+      int vertexColorLocation = GL.GetUniformLocation(shader.Handle, "currentColor");
+      GL.Uniform4(vertexColorLocation, 0.0f, greenVal, 0.0f, 1.0f);
 
       //GL.BindVertexArray(VertexArrayObject);
       
@@ -222,7 +236,6 @@ namespace GameSpace
         0.5f, -0.5f, 0.0f,
         -0.5f,  -0.5f, 0.0f,
         -0.5f, 0.5f, 0.0f,
-        0.75f, 0.5f, 0.0f
       };
 
       // For an EBO, we need to specify which triangles map to which vertices!
@@ -230,7 +243,6 @@ namespace GameSpace
       uint[] rectangleIndices = {
         0, 1, 3,
         1, 2, 3,
-        0, 4, 1
       };
 
       if (geomType == Geometry.TRIANGLE) {

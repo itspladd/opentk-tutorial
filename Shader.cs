@@ -6,7 +6,7 @@ using OpenTK.Graphics.OpenGL;
 
 public class Shader {
   // This Handle var will represent the location of the shader program after it's compiled.
-  private int Handle;
+  public readonly int Handle;
 
   // This bool represents whether or not the shader has been properly deleted before the program ends.
   // Because otherwise the memory won't be freed.
