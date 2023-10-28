@@ -97,9 +97,8 @@ namespace GameSpace
       GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
 
       // 4. Set the vertex attribute pointers
-      int aPosition = shader.GetAttribLocation("aPosition");
-      GL.VertexAttribPointer(aPosition, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
-      GL.EnableVertexAttribArray(aPosition);
+      GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+      GL.EnableVertexAttribArray(0);
     }
 
     // ..:: Initialization for a single element buffer. ::..
@@ -222,14 +221,16 @@ namespace GameSpace
         0.5f, 0.5f, 0.0f,
         0.5f, -0.5f, 0.0f,
         -0.5f,  -0.5f, 0.0f,
-        -0.5f, 0.5f, 0.0f 
+        -0.5f, 0.5f, 0.0f,
+        0.75f, 0.5f, 0.0f
       };
 
       // For an EBO, we need to specify which triangles map to which vertices!
       // This will draw our rectangle.
       uint[] rectangleIndices = {
         0, 1, 3,
-        1, 2, 3
+        1, 2, 3,
+        0, 4, 1
       };
 
       if (geomType == Geometry.TRIANGLE) {
@@ -267,7 +268,11 @@ namespace GameSpace
         vertices,
         BufferUsageHint.StaticDraw);
 
-      int aPosition = shader.GetAttribLocation("aPosition");
+      // This function call lets you omit the layout (location = 0) code in the shader,
+      // and allows the next function to use the aPosition var instead of a hard-coded 0.
+      // But it also adds overhead, so we're omitting it for now.
+      // int aPosition = shader.GetAttribLocation("aPosition");
+      
       // Alright, this is a big function call, so time for some long-form notes.
       // This function tells OpenGL *how* to interpret the vertex data, on a per-vertex-attribute basis.
       GL.VertexAttribPointer(
@@ -276,12 +281,13 @@ namespace GameSpace
         // We specified this in the shader! This line:
         ////   layout (location = 0) in vec3 aPosition;
         // So this attribute is at at location 0.
-        // with our new shader GetAttribLocation function, we use that instead of hard-coding a 0 here.
-        // 0,
-        aPosition,
+        // If we used GetAttribLocation above, we use the result instead of hard-coding a 0 here.
+        0, //aposition, 
+
         // size (int):
         // since it's a vec3, then the size is 3 (x, y, and z floats));
         3, 
+        
         // type (enum): 
         // the data is float data, so we use the appropriate enum.
         VertexAttribPointerType.Float, 
@@ -305,7 +311,7 @@ namespace GameSpace
 
       // Now we have to enable vertex attributes (which are...disabled by default? huh?)
       // And we have to specify the index.
-      GL.EnableVertexAttribArray(aPosition);
+      GL.EnableVertexAttribArray(0);
     }
 
     protected void LogGLInformation() {
