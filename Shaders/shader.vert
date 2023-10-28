@@ -40,7 +40,7 @@ void main()
   // gl_Position = vec4(aPosition.yxz, 1.0); // Swap x and y for science?
   // YUP the rectangle flipped its dimensions. Fun.
 
-  // Set the output color to a dark red.
+  // Round 1: Send a dark red to the fragment shader.
   vertexColor = vec4(0.5, 0.0,  0.0, 1.0);
 
 }
