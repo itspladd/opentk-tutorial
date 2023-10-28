@@ -6,8 +6,14 @@
 // Note to self: 'glxinfo' command showed me the OpenGL version I'm running.
 #version 300 es
 
-//Declare output variable
-//It's vec4 because it'll hold 4 floats: the RGBA values.
+// INPUTS/OUTPUTS
+// Fragment shaders must declare an output color for their fragments.
+// Otherwise, it will be undefined (which will probably mean they're either black or white)
+
+// We can also pass an output of an earlier shader to this one by using the same var name/type.
+// (More about this in shader.vert notes!)
+
+// Output color variable. It's vec4 because it'll hold 4 floats: the RGBA values.
 out mediump vec4 FragColor;
 
 void main()

@@ -310,7 +310,8 @@ namespace GameSpace
       // So our VertexAttribPointer will be taking the data from the VBO that we bound earlier.
 
       // Now we have to enable vertex attributes (which are...disabled by default? huh?)
-      // And we have to specify the index.
+      // And we have to specify the index/location.
+      // This matches up with the location in the shader.
       GL.EnableVertexAttribArray(0);
     }
 
