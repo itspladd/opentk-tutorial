@@ -156,13 +156,21 @@ namespace GameSpace
       base.OnRenderFrame(e);
       GL.Clear(ClearBufferMask.ColorBufferBit);
       
-      // Must call Use() on the shader before accessing uniform vars!
+      // Must call Use() on the shader before UPATING uniform vars (you can try to access them beforehand?!)
       shader.Use();
 
       // Set the uniform var based on current time
       double elapsedTime = _timer.Elapsed.TotalSeconds;
       float greenVal = (float)Math.Sin(elapsedTime) / 2.0f + 0.5f;
-      int vertexColorLocation = GL.GetUniformLocation(shader.Handle, "currentColor");
+
+      // Retrieve the location of the currentColor Uniform!
+      string uniformToGet = "currentColor";
+      int vertexColorLocation = GL.GetUniformLocation(shader.Handle, uniformToGet);
+      if (vertexColorLocation == -1) {
+        logger.Error($"GL.GetUniformLocation could not locate Uniform '{uniformToGet}'. Are you using the right shader?");
+      }
+
+      // Uniform4 means "expects 4 values". There are other overloads!
       GL.Uniform4(vertexColorLocation, 0.0f, greenVal, 0.0f, 1.0f);
 
       //GL.BindVertexArray(VertexArrayObject);
