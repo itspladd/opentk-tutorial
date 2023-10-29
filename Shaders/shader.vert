@@ -21,10 +21,11 @@
 
 // INPUT
 layout (location = 0) in vec3 aPosition;
+layout (location = 1) in vec3 aColor;
 
 // OUTPUT
 // We're gonna be silly here and use the vertex shader to define the fragment shader's color.
-out vec4 vertexColor;
+out vec3 vertexColor;
 
 vec3 absolute(vec3 inputVec) {
   vec3 returnVec = vec3(0.0,0.0,0.0);
@@ -114,4 +115,8 @@ void main()
   // HAHA I GOT A COOL RAINBOW GRADIENT. HELL YES.
   // Note: I had a weird issue! I was accidentally drawing an extra triangle that had an undefined vertex!
   // So it was using 0, 0 for that vertex and creating a weird break in the gradient.
+
+  // *** Round 3 ***
+  // *** Bring color data in with the vertex position data, and pass it to the fragment shader.
+  vertexColor = aColor;
 }

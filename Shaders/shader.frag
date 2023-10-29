@@ -15,7 +15,7 @@
 
 
 // INPUT
-in mediump vec4 vertexColor;
+in mediump vec3 vertexColor;
 
 // OUTPUT
 // Output color variable. It's vec4 because it'll hold 4 floats: the RGBA values.
@@ -27,7 +27,9 @@ out mediump vec4 FragColor;
 // If we don't use it, it will be silently removed from the code, which can cause weird errors!
 // UNIFORMS CAN BE ACCESSED OUTSIDE THE SHADER ITSELF! SO WE CAN PASS VALUES FROM EXTERNAL CODE.
 // We'll be grabbing and changing this uniform var inside Game.cs!
-uniform mediump vec4 currentColor;
+
+// Commented out for round 3, when we moved to having color data input with the vertex data.
+//uniform mediump vec4 currentColor;
 
 void main()
 {
@@ -41,5 +43,5 @@ void main()
 
   // *** Round 3 ***
   // *** Using uniform var
-  FragColor = currentColor;
+  FragColor = vec4(vertexColor, 1.0);
 }

@@ -70,7 +70,7 @@ namespace GameSpace
             
       // Decides what color the window should be after it gets cleared between frames
       GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-      currentGeom = Geometry.RECTANGLE;
+      currentGeom = Geometry.TRIANGLE;
       SetGeometryData(currentGeom);
 
       InitVertexBuffer(vertices);
@@ -86,25 +86,6 @@ namespace GameSpace
       // Start our stopwatch
       _timer = new Stopwatch();
       _timer.Start();
-    }
-
-    // ..:: Initialization code for a single vertex array. ::..
-    // (We only do this once, unless the object will change often.)
-    protected void InitVertexBuffer(float[] vertices) {
-      // 1. Generate the VBO and VAO and assign their IDs to the global ints we created.
-      VertexBufferObject = GL.GenBuffer();
-      VertexArrayObject = GL.GenVertexArray();
-
-      // 2. Bind it
-      GL.BindVertexArray(VertexArrayObject);
-
-      // 3. Copy our vertices into our global VBO (bind it first!)
-      GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferObject);
-      GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
-
-      // 4. Set the vertex attribute pointers
-      GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
-      GL.EnableVertexAttribArray(0);
     }
 
     // ..:: Initialization for a single element buffer. ::..
@@ -164,15 +145,12 @@ namespace GameSpace
       float greenVal = (float)Math.Sin(elapsedTime) / 2.0f + 0.5f;
 
       // Retrieve the location of the currentColor Uniform!
-      string uniformToGet = "currentColor";
-      int vertexColorLocation = GL.GetUniformLocation(shader.Handle, uniformToGet);
-      if (vertexColorLocation == -1) {
-        logger.Error($"GL.GetUniformLocation could not locate Uniform '{uniformToGet}'. Are you using the right shader?");
-      }
+      //int vertexColorLocation = GetUniform("currentColor");
 
       // Uniform4 means "expects 4 values". There are other overloads!
-      GL.Uniform4(vertexColorLocation, 0.0f, greenVal, 0.0f, 1.0f);
-
+/*       if (vertexColorLocation != -1) {
+        GL.Uniform4(vertexColorLocation, 0.0f, greenVal, 0.0f, 1.0f);
+      } */
       //GL.BindVertexArray(VertexArrayObject);
       
       if (currentGeom == Geometry.TRIANGLE) {
@@ -186,10 +164,18 @@ namespace GameSpace
       FrameCount++;
     }
 
+    protected int GetUniform(string uniformName) {
+      int vertexColorLocation = GL.GetUniformLocation(shader.Handle, uniformName);
+      if (vertexColorLocation == -1) {
+        logger.Error($"GL.GetUniformLocation could not locate Uniform '{uniformName}'. Are you using the right shader?");
+      }
+
+      return vertexColorLocation;
+    }
+
     protected void RenderWithDebugLogs(FrameEventArgs e) {
       logger.Debug(string.Format("-----  START FRAME {0}  -----", FrameCount));
-      base.OnRenderFrame(e);
-      
+
       base.OnRenderFrame(e);
       logger.Debug("base.OnRenderFrame complete");
       
@@ -205,6 +191,16 @@ namespace GameSpace
       // then we can draw what's in our VertexArrayObject?!?!
       shader.Use();
       logger.Debug("shader.Use() complete");
+
+      // Set the uniform var based on current time
+      double elapsedTime = _timer.Elapsed.TotalSeconds;
+      float greenVal = (float)Math.Sin(elapsedTime) / 2.0f + 0.5f;
+
+      // Retrieve the location of the currentColor Uniform!
+      int vertexColorLocation = GetUniform("currentColor");
+      if (vertexColorLocation == -1) {
+        GL.Uniform4(vertexColorLocation, 0.0f, greenVal, 0.0f, 1.0f);
+      }
 
       logger.Debug($"Drawing {currentGeom}");
       if (currentGeom == Geometry.TRIANGLE) {
@@ -233,17 +229,22 @@ namespace GameSpace
       // Anything outside that range will be clipped!
       // Normalized coordinates get converted to screen-space coordinates
       // using the Viewport information.
+
+      // We can include both color and position data!
+      // This corresponds with a change in our shader: we set a new 'layout (location = 1)' variable. 
       float[] triangleVertices = {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f,  0.5f, 0.0f 
+        // positions        // colors
+        -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // v0
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // v1
+         0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f, // v2
       };
 
       float[] rectangleVertices = {
-        0.5f, 0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        -0.5f,  -0.5f, 0.0f,
-        -0.5f, 0.5f, 0.0f,
+        // positions        // colors
+         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // top right
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom left
+        -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, // top left
       };
 
       // For an EBO, we need to specify which triangles map to which vertices!
@@ -264,13 +265,47 @@ namespace GameSpace
 
     }
 
-    // Same code as InitVertexArray, but with detailed notes at each step.
-    protected void InitVertexArrayWithNotes(float[] vertices) {
-
-      // Here we're creating a Vertex Array Object (VAO) and bind it.
-      // This is a becoming a common pattern!
+        // ..:: Initialization code for a single vertex array. ::..
+    // (We only do this once, unless the object will change often.)
+    protected void InitVertexBuffer(float[] vertices) {
+      // 1. Generate the VBO and VAO and assign their IDs to the global ints we created.
       VertexArrayObject = GL.GenVertexArray();
+      VertexBufferObject = GL.GenBuffer();
+
+      // 2. Bind it
       GL.BindVertexArray(VertexArrayObject);
+
+      // 3. Copy our vertices into our global VBO (bind it first!)
+      GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferObject);
+      GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
+
+      // 4. Set the vertex attribute pointers (0: position, 1: color)
+      GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
+      GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
+
+      // 5. Enable the attributes that we want to use
+      GL.EnableVertexAttribArray(0);
+      GL.EnableVertexAttribArray(1);
+    }
+
+    // Same code as InitVertexArray, but with detailed notes at each step.
+    protected void InitVertexBufferWithNotes(float[] vertices) {
+
+      // Here we're creating a Vertex Array Object (VAO) and Vertex Buffer Object (VBO) and binding them.
+      // This is a becoming a common pattern!
+      // Each of these is just an int pointing to the VAO/VBO in memory.
+      VertexArrayObject = GL.GenVertexArray();
+      VertexBufferObject = GL.GenBuffer();
+      
+      // Bind the VAO.
+      GL.BindVertexArray(VertexArrayObject);
+      // Binding the VAO sneakily influences a lot of things.
+      // The currently bound VAO saves:
+      // - GL.EnableVertexAttribArray calls
+      // - GL.DisableVertexAttribArray calls
+      // - GL.VertexAttribPointer configurations
+      // - The currently bound VBO when GL.VertexAttribPointer is called
+      // ...So we bind it during initialization, but we might also re-bind it many times during init and rendering to point to different VAOs.
       
       // Binds the VertexBufferOjbect to the ArrayBuffer target.
       // Now when we do anything to ArrayBuffer, we're configuring VertexBufferObject.
@@ -317,12 +352,24 @@ namespace GameSpace
         // since our data is already normalized, we don't want GL to normalize it for us.
         false,
         // stride (int): how big is the space between each attribute?
-        3 * sizeof(float),
+        // When we were just passing position data, position was the only attribute, so it's 3 floats big.
+        // 3 * sizeof(float),
+        // Now that we're passing color attribute data as well, each attribute is further apart - twice as far!
+        6 * sizeof(float),
         // offset (int):
         // Where in the buffer does this data start?
         // Since we're at the very beginning, it's just 0. (This will be explored more later.)
         0
       );
+
+      // Since we have color data now, we need to init another pointer!
+      // It's very similar, but this time the attribute is at location 1...
+      GL.VertexAttribPointer(
+        1, // The attribute is at location 1...
+        3, VertexAttribPointerType.Float, false, 6 * sizeof(float),
+        3 * sizeof(float) // and the offset is 3 floats big (since there's 3 position floats in front of it!)
+      );
+
 
       // Each vertex takes its data from memory managed by a VBOs.
       // We can have multiple VBOs in existence!
@@ -333,6 +380,7 @@ namespace GameSpace
       // And we have to specify the index/location.
       // This matches up with the location in the shader.
       GL.EnableVertexAttribArray(0);
+      GL.EnableVertexAttribArray(1); // Once we add the color data, gotta enable that too!
     }
 
     protected void LogGLInformation() {
