@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using LoggerUtil;
-using OpenTK.Graphics.OpenGL;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
@@ -84,8 +84,11 @@ namespace GameSpace
       texture1 = new Texture("./Textures/container.jpg");
       texture2 = new Texture("./Textures/pladd_face.jpg");
 
-      texture0.Use();
+      // Load vertex information for textures
+      // This is our array with vertext position data and texture location data
+      // Plus the indices to use for the rectangle
       SetTextureVertices();
+
       InitVertexBuffer(vertices);
 
       if (currentGeom == Geometry.RECTANGLE) {
@@ -94,7 +97,13 @@ namespace GameSpace
 
       // Hey let's try loading our shader
       shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag", logger);
+
       shader.Use();
+
+      // Tell the shader where the texture slots are AFTER calling Use()
+      shader.SetInt("texture0", 0);
+      shader.SetInt("texture1", 1);
+      shader.SetInt("texture2", 2);
 
       // Start our stopwatch
       _timer = new Stopwatch();
@@ -149,8 +158,13 @@ namespace GameSpace
       }
       base.OnRenderFrame(e);
       GL.Clear(ClearBufferMask.ColorBufferBit);
-      
-      // Must call Use() on the shader before UPATING uniform vars (you can try to access them beforehand?!)
+
+      // Assign our texture data into slots
+      texture0.Use(TextureUnit.Texture0);
+      texture1.Use(TextureUnit.Texture1);
+      texture2.Use(TextureUnit.Texture2);
+
+      // Must call Use() on the shader before UPDATING uniform vars (you can try to access them beforehand?!)
       shader.Use();
 
       // Set the uniform var based on current time

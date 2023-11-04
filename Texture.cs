@@ -42,9 +42,10 @@ namespace GameSpace {
 
     // Given a texture unit, set that texture as the active texture.
     // Use 0 by default.
+    // We can have MULTIPLE TEXTURES IN USE AT ONCE.
     public void Use(TextureUnit unit = TextureUnit.Texture0) {
-      GL.ActiveTexture(unit);
-      GL.BindTexture(TextureTarget.Texture2D, Handle);
+      GL.ActiveTexture(unit); // Set the texture in the given unit as "active"...
+      GL.BindTexture(TextureTarget.Texture2D, Handle); // so that BindTexture will apply to that one.
     }
 
     private void SetTextureData() {

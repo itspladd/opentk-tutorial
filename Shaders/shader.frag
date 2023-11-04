@@ -70,15 +70,15 @@ void main()
   // But...where does that uniform actually get set? HMMM.
   // oh ha ha that's literally the next lesson
   // 0 is the default texture "unit"
-  FragColor = texture(texture0, textureCoordinates);
+  //FragColor = texture(texture0, textureCoordinates);
 
   // *** Round 5 ***
   // *** MIXING TEXTURES? WHAT. WHY.
-  //FragColor = mix( // Built-in GLSL function. Mixes two textures.
-  //  texture(texture0, textureCoordinates), // First texture in the mix
-  //  texture(texture1, textureCoordinates), // Second texture in the mix
-  //  0.2 // Weighting for the lerp between the textures.
+  FragColor = mix( // Built-in GLSL function. Mixes two textures.
+    texture(texture0, textureCoordinates), // First texture in the mix
+    texture(texture2, textureCoordinates), // Second texture in the mix
+    0.2 // Weighting for the lerp between the textures.
         // This value is the amount of the SECOND texture to use.
         // So 0.2 is 80% texture 1, 20% texture 2.
-  //);
+  );
 }
