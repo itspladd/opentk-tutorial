@@ -5,6 +5,7 @@ using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using OpenTK.Mathematics;
 
 namespace GameSpace
 {
@@ -104,6 +105,15 @@ namespace GameSpace
       shader.SetInt("texture0", 0);
       shader.SetInt("texture1", 1);
       shader.SetInt("texture2", 2);
+
+      // Create a rotation matrix: 45 degrees around the z-axis (working in 2D currently)
+      Matrix4 rotation = Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(45.0f));
+      // Create a scale matrix: half size on all axes.
+      Matrix4 scale = Matrix4.CreateScale(0.5f, 0.5f, 0.5f);
+      // Multiply them to create the transformation matrix.
+      Matrix4 transformation = scale * rotation;
+
+      shader.SetMatrix4("transform", transformation);
 
       // Start our stopwatch
       _timer = new Stopwatch();

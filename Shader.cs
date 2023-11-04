@@ -3,6 +3,7 @@
 // Plus other functions later (ooh mysterious)
 using LoggerUtil;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Mathematics;
 
 public class Shader {
   // This Handle var will represent the location of the shader program after it's compiled.
@@ -91,12 +92,30 @@ public class Shader {
   * Helper function to set a single-integer uniform in the shader
   */
   public void SetInt(string name, int value) {
+    // Make sure the shader is being used
+    Use();
+
     // Find the location of the specified uniform in this Shader
     int location = GL.GetUniformLocation(Handle, name);
 
     // Set it!
     // We use Uniform1 because this is assuming a single-value integer uniform.
     GL.Uniform1(location, value);
+  }
+
+  public void SetMatrix4(string name, Matrix4 matrix) {
+    // Make sure the shader is being used
+    Use();
+
+    // Find location of the uniform
+    int location = GL.GetUniformLocation(Handle, name);
+
+    // Set the uniform. A few specific arguments:
+    GL.UniformMatrix4(
+      location, // Location, this is normal. 
+      true, // Transpose the matrix? OpenTK uses row-major indexing, but GLSL usually uses column-major, so this is true.
+      ref matrix // A reference to the matrix (why do we need to use ref instead of just passing the value?)
+    );
   }
 
   /**

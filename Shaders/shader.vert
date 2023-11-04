@@ -31,70 +31,30 @@ layout (location = 1) in vec2 aTextureCoordinates;
 // Send texture coordinates to fragment shader
 out vec2 textureCoordinates;
 
-vec3 absolute(vec3 inputVec) {
-  vec3 returnVec = vec3(0.0,0.0,0.0);
-  for(int i = 0; i < 3; i++) {
-    float iVal = inputVec[i];
-    iVal = iVal * sign(iVal);
-    returnVec[i] = iVal;
-  }
-  return returnVec;
-}
+// *** UNIFORMS ***
+// Transformation matrix. Defined in code and passed in through uniform variable.
+uniform mat4 transform;
 
-int quadrant(vec2 position) {
-  float sX = sign(position.x);
-  float sY = sign(position.y);
-  if (sX == 1.0 && sY == 1.0) {
-    return 1;
-  }
-  if (sX == -1.0 && sY == 1.0) {
-    return 2;
-  }
-  if (sX == -1.0 && sY == -1.0) {
-    return 3;
-  }
-  if (sX == 1.0 && sY == -1.0) {
-    return 4;
-  }
-
-  return 0;
-}
-
-vec3 radialColor(vec3 inputVec) {
-  // Red in q1 (top right), yellow in ( q2top left), blue in q3 (bottom left), green in q4 (bottom right).
-  vec3 returnRGB;
-  int q = quadrant(inputVec.xy);
-  if (q == 1) {
-    returnRGB = vec3(1.0, 0.0, 0.0);
-  }
-  else if (q == 2) {
-    returnRGB = vec3(1.0, 1.0, 0.0);
-  }
-  else if (q == 3) {
-    returnRGB = vec3(0.0, 0.0, 1.0);
-  }
-  else if (q == 4) {
-    returnRGB = vec3(0.0, 1.0, 0.0);
-  }
-  else {
-    returnRGB = vec3(1.0, 1.0, 1.0);
-  }
-  return returnRGB;
-}
 
 //Every shader has a main function
 void main()
 {
+  // *** BASIC USE CASE ***
   // gl_Position is a built-in vertex shader varible.
   // It represents the final position of a vertex.
   // We're not processing any input data, just forwarding the input to the output.
   // So this is, like, the simplest vertex shader imaginable.
   // ...according to the OpenTK docs.
-  gl_Position = vec4(aPosition, 1.0); // Look! We're using a vector in a constructor! Like in the example notes!
+  //gl_Position = vec4(aPosition, 1.0); // Look! We're using a vector in a constructor! Like in the example notes!
 
+  // *** SWIZZLING THE VERTEX POSITIONS ***
   // Theoretically we should be able to mess up some stuff if we swizzle...let's try it.
   // gl_Position = vec4(aPosition.yxz, 1.0); // Swap x and y for science?
   // YUP the rectangle flipped its dimensions. Fun.
+
+  // *** APPLYING TRANSFORMATIONS ***
+  // Simple case first: just turn the vertex positions into a vec4 and multiply by the transformation matrix. 
+  gl_Position = vec4(aPosition, 1.0) * transform;
 
   // *** Round 1 ***
   // *** Send a dark red to the fragment shader.
@@ -125,6 +85,61 @@ void main()
   //vertexColor = aColor;
 
   // *** Round 4 ***
-  // *** Bring tecture coordinate data in with the position data, and pass it to the fragment shader
+  // *** Bring texture coordinate data in with the position data, and pass it to the fragment shader
   textureCoordinates = aTextureCoordinates;
+}
+
+// A helper function I wrote that returns an "absolute" vector of an input vec3.
+// i.e. each component of the output is the absolute value of the input component.
+vec3 absolute(vec3 inputVec) {
+  vec3 returnVec = vec3(0.0,0.0,0.0);
+  for(int i = 0; i < 3; i++) {
+    float iVal = inputVec[i];
+    iVal = iVal * sign(iVal);
+    returnVec[i] = iVal;
+  }
+  return returnVec;
+}
+
+// A helper function I wrote to determine the quadrant for an input 2D vector.
+int quadrant(vec2 position) {
+  float sX = sign(position.x);
+  float sY = sign(position.y);
+  if (sX == 1.0 && sY == 1.0) {
+    return 1;
+  }
+  if (sX == -1.0 && sY == 1.0) {
+    return 2;
+  }
+  if (sX == -1.0 && sY == -1.0) {
+    return 3;
+  }
+  if (sX == 1.0 && sY == -1.0) {
+    return 4;
+  }
+
+  return 0;
+}
+
+// A helper function I wrote to return an RGB color based on the quadrant.
+vec3 radialColor(vec3 inputVec) {
+  // Red in q1 (top right), yellow in ( q2top left), blue in q3 (bottom left), green in q4 (bottom right).
+  vec3 returnRGB;
+  int q = quadrant(inputVec.xy);
+  if (q == 1) {
+    returnRGB = vec3(1.0, 0.0, 0.0);
+  }
+  else if (q == 2) {
+    returnRGB = vec3(1.0, 1.0, 0.0);
+  }
+  else if (q == 3) {
+    returnRGB = vec3(0.0, 0.0, 1.0);
+  }
+  else if (q == 4) {
+    returnRGB = vec3(0.0, 1.0, 0.0);
+  }
+  else {
+    returnRGB = vec3(1.0, 1.0, 1.0);
+  }
+  return returnRGB;
 }
