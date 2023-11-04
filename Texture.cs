@@ -40,7 +40,10 @@ namespace GameSpace {
       // PRETTY SNEAKY, OPENTK
     }
 
-    public void Use() {
+    // Given a texture unit, set that texture as the active texture.
+    // Use 0 by default.
+    public void Use(TextureUnit unit = TextureUnit.Texture0) {
+      GL.ActiveTexture(unit);
       GL.BindTexture(TextureTarget.Texture2D, Handle);
     }
 

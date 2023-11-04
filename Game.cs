@@ -61,6 +61,11 @@ namespace GameSpace
     // ? to mark it as nullable
     Shader shader;
 
+    // Texture properties
+    Texture texture0;
+    Texture texture1;
+    Texture texture2;
+
     private Geometry currentGeom;
   
     // OnLoad runs once, when the window opens. Initialization code goes here.
@@ -75,8 +80,11 @@ namespace GameSpace
       currentGeom = Geometry.RECTANGLE;
       //SetGeometryData(currentGeom);
 
-      Texture myTexture = new Texture("./Textures/wall.jpg");
-      myTexture.Use();
+      texture0 = new Texture("./Textures/wall.jpg");
+      texture1 = new Texture("./Textures/container.jpg");
+      texture2 = new Texture("./Textures/pladd_face.jpg");
+
+      texture0.Use();
       SetTextureVertices();
       InitVertexBuffer(vertices);
 

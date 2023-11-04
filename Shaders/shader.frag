@@ -32,8 +32,21 @@ out mediump vec4 FragColor;
 // Commented out for round 3, when we moved to having color data input with the vertex data.
 //uniform mediump vec4 currentColor;
 
-// New variable type, sampler2D! Not going into it for now, it's just a representation of a texture in the shader.
+// *** TEXTURES ***
+// Once a texture's pixels are loaded (using functions in our Texture class),
+// We need to tell the shader what textures it has access to.
+// OpenGL requires that 16 texture "units" (essentially slots) be available at the same time.
+// Some systems might support more than 16!
+// Check out this stackoverflow answer: https://stackoverflow.com/questions/46426331/number-of-texture-units-gl-texturei-in-opengl-4-implementation-in-visual-studi
+
+// Textures use the sampler2D type (TODO: always? or is that just the simplest case?)
+// "texture#" is the default naming for these uniforms. (Is it just the default? Can it be changed?)
 uniform sampler2D texture0;
+uniform sampler2D texture1;
+uniform sampler2D texture2;
+// Each of these will have an integer value assigned.
+// The integer value tells that variable WHICH TEXTURE "UNIT" TO USE.
+
 
 void main()
 {
@@ -56,5 +69,16 @@ void main()
   // We lso use the coordinates from the vertex shader.
   // But...where does that uniform actually get set? HMMM.
   // oh ha ha that's literally the next lesson
+  // 0 is the default texture "unit"
   FragColor = texture(texture0, textureCoordinates);
+
+  // *** Round 5 ***
+  // *** MIXING TEXTURES? WHAT. WHY.
+  //FragColor = mix( // Built-in GLSL function. Mixes two textures.
+  //  texture(texture0, textureCoordinates), // First texture in the mix
+  //  texture(texture1, textureCoordinates), // Second texture in the mix
+  //  0.2 // Weighting for the lerp between the textures.
+        // This value is the amount of the SECOND texture to use.
+        // So 0.2 is 80% texture 1, 20% texture 2.
+  //);
 }

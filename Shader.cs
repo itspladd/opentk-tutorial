@@ -88,6 +88,18 @@ public class Shader {
   }
 
   /**
+  * Helper function to set a single-integer uniform in the shader
+  */
+  public void SetInt(string name, int value) {
+    // Find the location of the specified uniform in this Shader
+    int location = GL.GetUniformLocation(Handle, name);
+
+    // Set it!
+    // We use Uniform1 because this is assuming a single-value integer uniform.
+    GL.Uniform1(location, value);
+  }
+
+  /**
   * Retrieves the location of the input attribute for this Shader.
   * This saves us from having to specify layout(location=0) in the shader code...
   * And we can use this anywhere else that we would want to hard-code a location.
