@@ -33,7 +33,11 @@ namespace GameSpace {
       );
 
       // After calling TexImage2D, you can generate the mipmaps (if you need them; we don't yet).
-      //GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+      GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+
+      // EXCEPT MATBE WE DO. BECAUSE THE DEFAULTS MIN/MAG SETTINGS USE THEM.
+      // YEAH I GOT A BLACK SQUARE WHEN I DIDN'T GENERATE THE MIPMAPS.
+      // PRETTY SNEAKY, OPENTK
     }
 
     public void Use() {

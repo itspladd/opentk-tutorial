@@ -15,7 +15,8 @@
 
 
 // INPUT
-in mediump vec3 vertexColor;
+//in mediump vec3 vertexColor; // if passing in color from vertex
+in mediump vec2 textureCoordinates; // if passing in texture coords from vertex
 
 // OUTPUT
 // Output color variable. It's vec4 because it'll hold 4 floats: the RGBA values.
@@ -31,6 +32,9 @@ out mediump vec4 FragColor;
 // Commented out for round 3, when we moved to having color data input with the vertex data.
 //uniform mediump vec4 currentColor;
 
+// New variable type, sampler2D! Not going into it for now, it's just a representation of a texture in the shader.
+uniform sampler2D texture0;
+
 void main()
 {
   // *** Round 1 ***
@@ -43,5 +47,14 @@ void main()
 
   // *** Round 3 ***
   // *** Using uniform var
-  FragColor = vec4(vertexColor, 1.0);
+  //FragColor = vec4(vertexColor, 1.0);
+
+  // *** Round 4 ***
+  // *** Texture!
+  // Execution here is relatively simple. We tell the fragment shader
+  // to use the new sampler2D uniform to determine the color.
+  // We lso use the coordinates from the vertex shader.
+  // But...where does that uniform actually get set? HMMM.
+  // oh ha ha that's literally the next lesson
+  FragColor = texture(texture0, textureCoordinates);
 }

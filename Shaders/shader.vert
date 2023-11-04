@@ -21,11 +21,15 @@
 
 // INPUT
 layout (location = 0) in vec3 aPosition;
-layout (location = 1) in vec3 aColor;
+//layout (location = 1) in vec3 aColor; // if passing in color data
+layout (location = 1) in vec2 aTextureCoordinates;
 
 // OUTPUT
 // We're gonna be silly here and use the vertex shader to define the fragment shader's color.
-out vec3 vertexColor;
+//out vec3 vertexColor;
+
+// Send texture coordinates to fragment shader
+out vec2 textureCoordinates;
 
 vec3 absolute(vec3 inputVec) {
   vec3 returnVec = vec3(0.0,0.0,0.0);
@@ -118,5 +122,9 @@ void main()
 
   // *** Round 3 ***
   // *** Bring color data in with the vertex position data, and pass it to the fragment shader.
-  vertexColor = aColor;
+  //vertexColor = aColor;
+
+  // *** Round 4 ***
+  // *** Bring tecture coordinate data in with the position data, and pass it to the fragment shader
+  textureCoordinates = aTextureCoordinates;
 }

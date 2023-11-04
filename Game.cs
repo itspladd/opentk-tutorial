@@ -73,8 +73,11 @@ namespace GameSpace
       // Decides what color the window should be after it gets cleared between frames
       GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
       currentGeom = Geometry.RECTANGLE;
-      SetGeometryData(currentGeom);
+      //SetGeometryData(currentGeom);
 
+      Texture myTexture = new Texture("./Textures/wall.jpg");
+      myTexture.Use();
+      SetTextureVertices();
       InitVertexBuffer(vertices);
 
       if (currentGeom == Geometry.RECTANGLE) {
@@ -224,6 +227,27 @@ namespace GameSpace
       FrameCount++;
     }
 
+    private void SetTextureVertices() {
+      // A rectangle with texture mapping.
+      // Similar to the color data example, we're just making the array longer!
+      // We'll have to tell the pointer how to parse this array.
+      float[] rectangleTextureVertices = {
+        // positions        // texture mapping coordinates
+         0.5f,  0.5f, 0.0f, 1.0f, 1.0f, // top right
+         0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
+        -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, // top left
+      };
+
+      uint[] rectangleIndices = {
+        0, 1, 3,
+        1, 2, 3,
+      };
+
+      vertices = rectangleTextureVertices;
+      indices = rectangleIndices;
+    }
+
     private void SetGeometryData(Geometry geomType) {
       // Array literals containing x, y, and z points as floats.
       // Note that they are a one-dimensional arrays! They're just formatted to look like 3xN arrays.
@@ -281,9 +305,13 @@ namespace GameSpace
       GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferObject);
       GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
 
-      // 4. Set the vertex attribute pointers (0: position, 1: color)
-      GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
-      GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
+      // 4. Set the vertex attribute pointers for position/color data (0: position, 1: color)
+      //GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
+      //GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
+
+      // 4. Set vertex attribute pointers for position/texture data (0: position, 1: texture)
+      GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
+      GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
 
       // 5. Enable the attributes that we want to use
       GL.EnableVertexAttribArray(0);
